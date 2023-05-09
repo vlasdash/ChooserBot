@@ -43,14 +43,22 @@ type ResponseBody struct {
 	ReplyMarkup *KeyboardMarkup `json:"reply_markup,omitempty"`
 }
 
+type Chat struct {
+	ID int64 `json:"id"`
+}
+
+type Message struct {
+	MessageID int64  `json:"message_id"`
+	Text      string `json:"text"`
+	Chat      Chat   `json:"chat"`
+}
+
 type Update struct {
-	Message struct {
-		MessageID int64  `json:"message_id"`
-		Text      string `json:"text"`
-		Chat      struct {
-			ID int64 `json:"id"`
-		} `json:"chat"`
-	} `json:"message"`
+	Message Message `json:"message"`
+}
+
+type sendWebhookURL struct {
+	URL string `json:"url"`
 }
 
 func NewHandler(token string) *Handler {
@@ -76,10 +84,6 @@ func NewHandler(token string) *Handler {
 	return h
 }
 
-type sendWebhookURL struct {
-	URL string `json:"url"`
-}
-
 func (h *Handler) SetWebhook() error {
 	webhookURL := config.C.App.WebhookURL
 	body := &sendWebhookURL{
@@ -90,7 +94,7 @@ func (h *Handler) SetWebhook() error {
 		return fmt.Errorf("could not marshal body: %v\n", err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/setWebhook", h.botToken)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", h.botToken, config.C.TG.WebhookMethod)
 	_, err = http.Post(url, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
 		return fmt.Errorf("could not set webhook: %v\n", err)
@@ -110,7 +114,7 @@ func (h *Handler) StartCommand(update *Update) error {
 		return fmt.Errorf("error at start command in marshal response: %v\n", err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", h.botToken)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", h.botToken, config.C.TG.SendMessageMethod)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
 		return fmt.Errorf("error at start command in http request: %v\n", err)
@@ -133,7 +137,7 @@ func (h *Handler) UnknownCommand(update *Update) error {
 		return fmt.Errorf("error at unknown command in marshal response: %v\n", err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", h.botToken)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", h.botToken, config.C.TG.SendMessageMethod)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
 		return fmt.Errorf("error at unknown command in http request: %v\n", err)
@@ -168,7 +172,7 @@ func (h *Handler) FindCommand(update *Update) error {
 		return fmt.Errorf("error at find command in marshal response: %v\n", err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", h.botToken)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", h.botToken, config.C.TG.SendMessageMethod)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
 		return fmt.Errorf("error at find command in http request: %v\n", err)
@@ -188,16 +192,16 @@ func (h *Handler) FindBookCommand(update *Update) error {
 			Keyboard: [][]KeyboardButton{
 				{
 					{
-						Text: "Психология",
+						Text: psychology,
 					},
 					{
-						Text: "История",
+						Text: history,
 					},
 					{
-						Text: "Проза",
+						Text: prose,
 					},
 					{
-						Text: "Поэзия",
+						Text: poetry,
 					},
 				},
 			},
@@ -209,7 +213,7 @@ func (h *Handler) FindBookCommand(update *Update) error {
 		return fmt.Errorf("error at find book command in marshal response: %v\n", err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", h.botToken)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", h.botToken, config.C.TG.SendMessageMethod)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
 		return fmt.Errorf("error at find book command in http request: %v\n", err)
@@ -229,16 +233,16 @@ func (h *Handler) FindMovieCommand(update *Update) error {
 			Keyboard: [][]KeyboardButton{
 				{
 					{
-						Text: "Ужасы",
+						Text: horrors,
 					},
 					{
-						Text: "Приключение",
+						Text: adventure,
 					},
 					{
-						Text: "Детективы",
+						Text: detectives,
 					},
 					{
-						Text: "Фантастика",
+						Text: fantastic,
 					},
 				},
 			},
@@ -247,16 +251,16 @@ func (h *Handler) FindMovieCommand(update *Update) error {
 
 	reqBytes, err := json.Marshal(body)
 	if err != nil {
-		return fmt.Errorf("error at find book command in marshal response: %v\n", err)
+		return fmt.Errorf("error at find movie command in marshal response: %v\n", err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", h.botToken)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", h.botToken, config.C.TG.SendMessageMethod)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
-		return fmt.Errorf("error at find book command in http request: %v\n", err)
+		return fmt.Errorf("error at find movie command in http request: %v\n", err)
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("error at find book command unexpected http status: %d\n", res.StatusCode)
+		return fmt.Errorf("error at find movie command unexpected http status: %d\n", res.StatusCode)
 	}
 
 	return nil
@@ -282,16 +286,16 @@ func (h *Handler) FindMovieByGenreCommand(update *Update) error {
 
 	reqBytes, err := json.Marshal(body)
 	if err != nil {
-		return fmt.Errorf("error at find book command in marshal response: %v\n", err)
+		return fmt.Errorf("error at find movie command in marshal response: %v\n", err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", h.botToken)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", h.botToken, config.C.TG.SendMessageMethod)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
-		return fmt.Errorf("error at find book command in http request: %v\n", err)
+		return fmt.Errorf("error at find movie command in http request: %v\n", err)
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("error at find book command unexpected http status: %d\n", res.StatusCode)
+		return fmt.Errorf("error at find movie command unexpected http status: %d\n", res.StatusCode)
 	}
 
 	return nil
@@ -320,7 +324,7 @@ func (h *Handler) FindBookByGenreCommand(update *Update) error {
 		return fmt.Errorf("error at find book command in marshal response: %v\n", err)
 	}
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", h.botToken)
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/%s", h.botToken, config.C.TG.SendMessageMethod)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(reqBytes))
 	if err != nil {
 		return fmt.Errorf("error at find book command in http request: %v\n", err)

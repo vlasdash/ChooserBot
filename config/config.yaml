@@ -1,3 +1,9 @@
 app:
   webhook_url:
   port: 8080
+tg:
+  webhook_method: "setWebhook"
+  send_message_method: "sendMessage"
+  hello_message: "Добро пожаловать! Я помогу Вам выбрать занятие на вечер. Для этого введите команду /find!"
+  unknown_message: "Я Вас не понимаю"
+

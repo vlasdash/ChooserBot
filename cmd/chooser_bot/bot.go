@@ -11,9 +11,10 @@ import (
 )
 
 const ConfigPath = "./config/"
+const EnvPath = ".env.example"
 
 func StartPasswordStorageBot() error {
-	_ = godotenv.Load(".env.example")
+	_ = godotenv.Load(EnvPath)
 
 	err := config.LoadConfig(ConfigPath)
 	if err != nil {

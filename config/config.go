@@ -6,6 +6,12 @@ import (
 
 type Config struct {
 	App AppConfig `yaml:"app"`
+	TG  TgConfig  `yaml:"tg"`
+}
+
+type TgConfig struct {
+	WebhookMethod     string `yaml:"webhook_method"`
+	SendMessageMethod string `yaml:"send_message_method"`
 }
 
 type AppConfig struct {
@@ -27,6 +33,8 @@ func LoadConfig(path string) error {
 	}
 	C.App.WebhookURL = viper.GetStringMap("app")["webhook_url"].(string)
 	C.App.Port = viper.GetStringMap("app")["port"].(int)
+	C.TG.WebhookMethod = viper.GetStringMap("tg")["webhook_method"].(string)
+	C.TG.SendMessageMethod = viper.GetStringMap("tg")["send_message_method"].(string)
 
 	return nil
 }

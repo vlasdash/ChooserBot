@@ -1,5 +1,5 @@
 app:
-  webhook_url:
+  webhook_url: ""
   port: 8080
 tg:
   webhook_method: "setWebhook"

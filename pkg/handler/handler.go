@@ -106,7 +106,7 @@ func (h *Handler) SetWebhook() error {
 func (h *Handler) StartCommand(update *Update) error {
 	body := &ResponseBody{
 		ChatID: update.Message.Chat.ID,
-		Text:   "Добро пожаловать! Я помогу Вам выбрать занятие на вечер. Для этого введите команду /find!",
+		Text:   config.C.TG.HelloMessage,
 	}
 
 	reqBytes, err := json.Marshal(body)
@@ -129,7 +129,7 @@ func (h *Handler) StartCommand(update *Update) error {
 func (h *Handler) UnknownCommand(update *Update) error {
 	body := &ResponseBody{
 		ChatID: update.Message.Chat.ID,
-		Text:   "Я Вас не понимаю",
+		Text:   config.C.TG.UnknownMessage,
 	}
 
 	reqBytes, err := json.Marshal(body)
